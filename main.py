@@ -13,6 +13,8 @@ logging.basicConfig(
     format="%(asctime)s | %(message)s"
 )
 
+SYMBOLS = ["BTC/USDT", "ETH/USDT", "SOL/USDT"]
+
 def fetch_candle_data(symbol="BTC/USDT", timeframe="1h", limit=100):
     exchange = ccxt.binance()
 
@@ -114,24 +116,26 @@ def main(symbol="BTC/USDT"):
     price, rsi, sma20, sma50, signal, reason = generate_signal(df)
 
     print("===== CRYPTO SIGNAL BOT =====")
-    print(f"Pair: BTC/USDT")
+    print(f"Pair: {symbol}")
     print(f"Latest Price: {price}")
     print(f"RSI: {round(rsi, 2)}")
     print(f"SMA20: {round(sma20, 2)}")
     print(f"SMA50: {round(sma50, 2)}")
     print(f"Signal: {signal}")
     print(f"Reason: {reason}")
-    save_signal_to_csv(symbol, price, rsi, sma20, sma50, signal, reason)
+    print("=============================\n")
+    
 
     logging.info(
-    f"BTC/USDT | Price: {price} | RSI: {round(rsi,2)} | "
+    f"{symbol} | Price: {price} | RSI: {round(rsi,2)} | "
     f"SMA20: {round(sma20,2)} | SMA50: {round(sma50,2)} | "
     f"Signal: {signal}"
 )
-
+    save_signal_to_csv(symbol, price, rsi, sma20, sma50, signal, reason)
 
 if __name__ == "__main__":
     while True:
-        main()
+        for symbol in SYMBOLS:
+            main(symbol=symbol)
         print("\nWaiting 60 seconds before next check...\n")
         time.sleep(60)
