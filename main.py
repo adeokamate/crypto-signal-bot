@@ -1,4 +1,3 @@
-import ccxt
 import pandas as pd
 import time
 from utils.charting import plot_chart
@@ -25,23 +24,7 @@ from strategy.indicators import (
 
 from strategy.signals import generate_signal
 from utils.storage import save_signal_to_csv, log_signal
-
-def fetch_candle_data(symbol, timeframe, limit):
-    exchange = ccxt.binance()
-
-    candles = exchange.fetch_ohlcv(
-        symbol,
-        timeframe=timeframe,
-        limit=limit
-    )
-
-    df = pd.DataFrame(
-        candles,
-        columns=["timestamp", "open", "high", "low", "close", "volume"]
-    )
-
-    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
-    return df
+from services.market_data import fetch_candle_data
 
 
 def main(symbol):
@@ -67,12 +50,14 @@ def main(symbol):
     print(f"Reason: {reason}")
     print("=============================\n")
 
-    logging.info(
-        f"{symbol} | Price: {price} | RSI: {round(rsi, 2)} | "
-        f"SMA{SMA_SHORT_WINDOW}: {round(sma_short, 2)} | "
-        f"SMA{SMA_LONG_WINDOW}: {round(sma_long, 2)} | "
-        f"Signal: {signal}"
-    )
+    log_signal(
+    symbol,
+    price,
+    rsi,
+    sma_short,
+    sma_long,
+    signal
+)
 
     save_signal_to_csv(
         symbol,
