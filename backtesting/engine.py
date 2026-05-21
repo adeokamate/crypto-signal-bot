@@ -1,5 +1,6 @@
 def run_backtest(df):
 
+
     starting_balance = 1000
 
     balance = starting_balance
@@ -9,6 +10,7 @@ def run_backtest(df):
     entry_price = 0
 
     trades = []
+    completed_trades = 0
 
     for i in range(len(df)):
 
@@ -48,6 +50,7 @@ def run_backtest(df):
             profit = price - entry_price
 
             balance += profit
+            completed_trades += 1
 
             trades.append({
                 "type": "SELL",
@@ -63,6 +66,6 @@ def run_backtest(df):
         "starting_balance": starting_balance,
         "final_balance": round(balance, 2),
         "total_profit": round(total_profit, 2),
-        "total_trades": len(trades),
+        "total_trades": completed_trades,
         "trades": trades
     }

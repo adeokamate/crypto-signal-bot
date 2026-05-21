@@ -52,3 +52,6 @@ timestamp,symbol,price,rsi,sma20,sma50,signal,reason
 2026-05-21 09:38:15.984397,BTC/USDT,77748.08,54.74,77642.51,77229.16,HOLD,"Trend is bullish, but RSI has not reached buy zone"
 2026-05-21 09:38:16.766572,ETH/USDT,2134.49,50.74,2135.67,2126.4,HOLD,"Trend is bullish, but RSI has not reached buy zone"
 2026-05-21 09:38:17.525498,SOL/USDT,86.48,58.61,86.11,85.23,HOLD,"Trend is bullish, but RSI has not reached buy zone"
+2026-05-21 09:44:05.843318,BTC/USDT,77677.89,52.91,77639.0,77227.76,HOLD,"Trend is bullish, but RSI has not reached buy zone"
+2026-05-21 09:44:06.576568,ETH/USDT,2131.57,48.61,2135.53,2126.34,HOLD,"Trend is bullish, but RSI has not reached buy zone"
+2026-05-21 09:44:07.311082,SOL/USDT,86.34,56.3,86.11,85.22,HOLD,"Trend is bullish, but RSI has not reached buy zone"
