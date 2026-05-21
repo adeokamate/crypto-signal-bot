@@ -1,11 +1,25 @@
 import ccxt
 import pandas as pd
-from ta.momentum import RSIIndicator
-from ta.trend import SMAIndicator
 import logging
 import time
 import csv
 import os
+
+from ta.momentum import RSIIndicator
+from ta.trend import SMAIndicator
+
+from config.settings import (
+    SYMBOLS,
+    TIMEFRAME,
+    SCAN_INTERVAL,
+    CANDLE_LIMIT,
+    RSI_PERIOD,
+    RSI_BUY_THRESHOLD,
+    RSI_SELL_THRESHOLD,
+    SMA_SHORT_WINDOW,
+    SMA_LONG_WINDOW,
+)
+
 
 logging.basicConfig(
     filename="logs/signals.log",
@@ -13,12 +27,15 @@ logging.basicConfig(
     format="%(asctime)s | %(message)s"
 )
 
-SYMBOLS = ["BTC/USDT", "ETH/USDT", "SOL/USDT"]
 
-def fetch_candle_data(symbol="BTC/USDT", timeframe="1h", limit=100):
+def fetch_candle_data(symbol, timeframe, limit):
     exchange = ccxt.binance()
 
-    candles = exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+    candles = exchange.fetch_ohlcv(
+        symbol,
+        timeframe=timeframe,
+        limit=limit
+    )
 
     df = pd.DataFrame(
         candles,
@@ -26,22 +43,32 @@ def fetch_candle_data(symbol="BTC/USDT", timeframe="1h", limit=100):
     )
 
     df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
-
     return df
 
 
-def calculate_rsi(df, period=14):
-    rsi = RSIIndicator(close=df["close"], window=period)
+def calculate_rsi(df):
+    rsi = RSIIndicator(
+        close=df["close"],
+        window=RSI_PERIOD
+    )
+
     df["rsi"] = rsi.rsi()
     return df
 
+
 def calculate_sma(df):
+    sma_short = SMAIndicator(
+        close=df["close"],
+        window=SMA_SHORT_WINDOW
+    )
 
-    sma20 = SMAIndicator(close=df["close"], window=20)
-    sma50 = SMAIndicator(close=df["close"], window=50)
+    sma_long = SMAIndicator(
+        close=df["close"],
+        window=SMA_LONG_WINDOW
+    )
 
-    df["sma20"] = sma20.sma_indicator()
-    df["sma50"] = sma50.sma_indicator()
+    df["sma_short"] = sma_short.sma_indicator()
+    df["sma_long"] = sma_long.sma_indicator()
 
     return df
 
@@ -51,34 +78,34 @@ def generate_signal(df):
 
     price = latest["close"]
     rsi = latest["rsi"]
-    sma20 = latest["sma20"]
-    sma50 = latest["sma50"]
+    sma_short = latest["sma_short"]
+    sma_long = latest["sma_long"]
 
-    if rsi < 30 and sma20 > sma50:
+    if rsi < RSI_BUY_THRESHOLD and sma_short > sma_long:
         signal = "STRONG BUY"
-        reason = "RSI is oversold and SMA20 is above SMA50, showing bullish trend confirmation"
+        reason = "RSI is oversold and short SMA is above long SMA"
 
-    elif rsi > 70 and sma20 < sma50:
+    elif rsi > RSI_SELL_THRESHOLD and sma_short < sma_long:
         signal = "STRONG SELL"
-        reason = "RSI is overbought and SMA20 is below SMA50, showing bearish trend confirmation"
+        reason = "RSI is overbought and short SMA is below long SMA"
 
-    elif sma20 > sma50:
+    elif sma_short > sma_long:
         signal = "HOLD"
-        reason = "Trend is bullish, but RSI has not reached a strong buy zone"
+        reason = "Trend is bullish, but RSI has not reached buy zone"
 
-    elif sma20 < sma50:
+    elif sma_short < sma_long:
         signal = "HOLD"
-        reason = "Trend is bearish, but RSI has not reached a strong sell zone"
+        reason = "Trend is bearish, but RSI has not reached sell zone"
 
     else:
         signal = "HOLD"
         reason = "No clear signal"
 
-    return price, rsi, sma20, sma50, signal, reason
+    return price, rsi, sma_short, sma_long, signal, reason
 
-def save_signal_to_csv(symbol, price, rsi, sma20, sma50, signal, reason):
+
+def save_signal_to_csv(symbol, price, rsi, sma_short, sma_long, signal, reason):
     file_path = "logs/signals.csv"
-
     file_exists = os.path.isfile(file_path)
 
     with open(file_path, mode="a", newline="") as file:
@@ -90,8 +117,8 @@ def save_signal_to_csv(symbol, price, rsi, sma20, sma50, signal, reason):
                 "symbol",
                 "price",
                 "rsi",
-                "sma20",
-                "sma50",
+                "sma_short",
+                "sma_long",
                 "signal",
                 "reason"
             ])
@@ -101,41 +128,57 @@ def save_signal_to_csv(symbol, price, rsi, sma20, sma50, signal, reason):
             symbol,
             price,
             round(rsi, 2),
-            round(sma20, 2),
-            round(sma50, 2),
+            round(sma_short, 2),
+            round(sma_long, 2),
             signal,
             reason
         ])
 
 
-def main(symbol="BTC/USDT"):
-    df = fetch_candle_data(symbol=symbol)
+def main(symbol):
+    df = fetch_candle_data(
+        symbol=symbol,
+        timeframe=TIMEFRAME,
+        limit=CANDLE_LIMIT
+    )
+
     df = calculate_rsi(df)
     df = calculate_sma(df)
 
-    price, rsi, sma20, sma50, signal, reason = generate_signal(df)
+    price, rsi, sma_short, sma_long, signal, reason = generate_signal(df)
 
     print("===== CRYPTO SIGNAL BOT =====")
     print(f"Pair: {symbol}")
     print(f"Latest Price: {price}")
     print(f"RSI: {round(rsi, 2)}")
-    print(f"SMA20: {round(sma20, 2)}")
-    print(f"SMA50: {round(sma50, 2)}")
+    print(f"SMA{SMA_SHORT_WINDOW}: {round(sma_short, 2)}")
+    print(f"SMA{SMA_LONG_WINDOW}: {round(sma_long, 2)}")
     print(f"Signal: {signal}")
     print(f"Reason: {reason}")
     print("=============================\n")
-    
 
     logging.info(
-    f"{symbol} | Price: {price} | RSI: {round(rsi,2)} | "
-    f"SMA20: {round(sma20,2)} | SMA50: {round(sma50,2)} | "
-    f"Signal: {signal}"
-)
-    save_signal_to_csv(symbol, price, rsi, sma20, sma50, signal, reason)
+        f"{symbol} | Price: {price} | RSI: {round(rsi, 2)} | "
+        f"SMA{SMA_SHORT_WINDOW}: {round(sma_short, 2)} | "
+        f"SMA{SMA_LONG_WINDOW}: {round(sma_long, 2)} | "
+        f"Signal: {signal}"
+    )
+
+    save_signal_to_csv(
+        symbol,
+        price,
+        rsi,
+        sma_short,
+        sma_long,
+        signal,
+        reason
+    )
+
 
 if __name__ == "__main__":
     while True:
         for symbol in SYMBOLS:
-            main(symbol=symbol)
-        print("\nWaiting 60 seconds before next check...\n")
-        time.sleep(60)
+            main(symbol)
+
+        print(f"\nWaiting {SCAN_INTERVAL} seconds before next check...\n")
+        time.sleep(SCAN_INTERVAL)
