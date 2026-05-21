@@ -1,9 +1,6 @@
 import ccxt
 import pandas as pd
-import logging
 import time
-import csv
-import os
 from utils.charting import plot_chart
 
 from ta.momentum import RSIIndicator
@@ -27,14 +24,7 @@ from strategy.indicators import (
 )
 
 from strategy.signals import generate_signal
-
-
-logging.basicConfig(
-    filename="logs/signals.log",
-    level=logging.INFO,
-    format="%(asctime)s | %(message)s"
-)
-
+from utils.storage import save_signal_to_csv, log_signal
 
 def fetch_candle_data(symbol, timeframe, limit):
     exchange = ccxt.binance()
@@ -52,36 +42,6 @@ def fetch_candle_data(symbol, timeframe, limit):
 
     df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
     return df
-
-def save_signal_to_csv(symbol, price, rsi, sma_short, sma_long, signal, reason):
-    file_path = "logs/signals.csv"
-    file_exists = os.path.isfile(file_path)
-
-    with open(file_path, mode="a", newline="") as file:
-        writer = csv.writer(file)
-
-        if not file_exists:
-            writer.writerow([
-                "timestamp",
-                "symbol",
-                "price",
-                "rsi",
-                "sma_short",
-                "sma_long",
-                "signal",
-                "reason"
-            ])
-
-        writer.writerow([
-            pd.Timestamp.now(),
-            symbol,
-            price,
-            round(rsi, 2),
-            round(sma_short, 2),
-            round(sma_long, 2),
-            signal,
-            reason
-        ])
 
 
 def main(symbol):
