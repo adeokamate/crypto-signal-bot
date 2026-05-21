@@ -25,7 +25,7 @@ from strategy.indicators import (
 from strategy.signals import generate_signal
 from utils.storage import save_signal_to_csv, log_signal
 from services.market_data import fetch_candle_data
-
+from backtesting.engine import run_backtest
 
 def main(symbol):
     df = fetch_candle_data(
@@ -36,7 +36,13 @@ def main(symbol):
 
     df = calculate_rsi(df)
     df = calculate_sma(df)
+    
+    balance, trades = run_backtest(df)
+    print(f"Backtest Balance: {round(balance, 2)}")
+    print(f"Trades Executed: {len(trades)}")
+
     plot_chart(df, symbol)
+
 
     price, rsi, sma_short, sma_long, signal, reason = generate_signal(df)
 
