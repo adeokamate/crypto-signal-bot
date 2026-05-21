@@ -1,7 +1,11 @@
 def run_backtest(df):
 
-    balance = 1000
+    starting_balance = 1000
+
+    balance = starting_balance
+
     position = None
+
     entry_price = 0
 
     trades = []
@@ -18,7 +22,7 @@ def run_backtest(df):
 
         sma_long = row["sma_long"]
 
-        # BUY CONDITION
+        # BUY
         if (
             rsi < 30
             and sma_short > sma_long
@@ -29,11 +33,12 @@ def run_backtest(df):
 
             entry_price = price
 
-            trades.append(
-                f"BUY at {price}"
-            )
+            trades.append({
+                "type": "BUY",
+                "price": price
+            })
 
-        # SELL CONDITION
+        # SELL
         elif (
             rsi > 70
             and sma_short < sma_long
@@ -44,10 +49,20 @@ def run_backtest(df):
 
             balance += profit
 
-            trades.append(
-                f"SELL at {price} | Profit: {round(profit, 2)}"
-            )
+            trades.append({
+                "type": "SELL",
+                "price": price,
+                "profit": round(profit, 2)
+            })
 
             position = None
 
-    return balance, trades
+    total_profit = balance - starting_balance
+
+    return {
+        "starting_balance": starting_balance,
+        "final_balance": round(balance, 2),
+        "total_profit": round(total_profit, 2),
+        "total_trades": len(trades),
+        "trades": trades
+    }

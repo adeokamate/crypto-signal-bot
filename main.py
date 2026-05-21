@@ -36,10 +36,34 @@ def main(symbol):
 
     df = calculate_rsi(df)
     df = calculate_sma(df)
+
+    backtest_results = run_backtest(df)
     
-    balance, trades = run_backtest(df)
-    print(f"Backtest Balance: {round(balance, 2)}")
-    print(f"Trades Executed: {len(trades)}")
+    print("===== BACKTEST RESULTS =====")
+
+    print(
+        f"Starting Balance: "
+        f"{backtest_results['starting_balance']}"
+    )
+
+    print(
+        f"Final Balance: "
+        f"{backtest_results['final_balance']}"
+    )
+
+    print(
+        f"Total Profit: "
+        f"{backtest_results['total_profit']}"
+    )
+
+    print(
+        f"Trades Executed: "
+        f"{backtest_results['total_trades']}"
+    )
+
+    print("============================")
+    for trade in backtest_results["trades"]:
+        print(trade)
 
     plot_chart(df, symbol)
 
