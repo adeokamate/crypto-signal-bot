@@ -1,0 +1,2 @@
+timestamp,symbol,price,rsi,sma20,sma50,signal,reason
+2026-05-21 08:19:42.443458,BTC/USDT,77929.29,59.86,77636.05,77214.77,HOLD,"Trend is bullish, but RSI has not reached a strong buy zone"

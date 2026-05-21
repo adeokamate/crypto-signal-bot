@@ -4,6 +4,8 @@ from ta.momentum import RSIIndicator
 from ta.trend import SMAIndicator
 import logging
 import time
+import csv
+import os
 
 logging.basicConfig(
     filename="logs/signals.log",
@@ -72,11 +74,40 @@ def generate_signal(df):
 
     return price, rsi, sma20, sma50, signal, reason
 
+def save_signal_to_csv(symbol, price, rsi, sma20, sma50, signal, reason):
+    file_path = "logs/signals.csv"
+
+    file_exists = os.path.isfile(file_path)
+
+    with open(file_path, mode="a", newline="") as file:
+        writer = csv.writer(file)
+
+        if not file_exists:
+            writer.writerow([
+                "timestamp",
+                "symbol",
+                "price",
+                "rsi",
+                "sma20",
+                "sma50",
+                "signal",
+                "reason"
+            ])
+
+        writer.writerow([
+            pd.Timestamp.now(),
+            symbol,
+            price,
+            round(rsi, 2),
+            round(sma20, 2),
+            round(sma50, 2),
+            signal,
+            reason
+        ])
 
 
-
-def main():
-    df = fetch_candle_data()
+def main(symbol="BTC/USDT"):
+    df = fetch_candle_data(symbol=symbol)
     df = calculate_rsi(df)
     df = calculate_sma(df)
 
@@ -90,7 +121,7 @@ def main():
     print(f"SMA50: {round(sma50, 2)}")
     print(f"Signal: {signal}")
     print(f"Reason: {reason}")
-
+    save_signal_to_csv(symbol, price, rsi, sma20, sma50, signal, reason)
 
     logging.info(
     f"BTC/USDT | Price: {price} | RSI: {round(rsi,2)} | "
