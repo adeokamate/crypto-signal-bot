@@ -11,6 +11,9 @@ def run_backtest(df):
     winning_trades = 0
     losing_trades = 0
 
+    realized_profit = 0
+    unrealized_profit = 0
+
     for i in range(len(df)):
         row = df.iloc[i]
 
@@ -19,7 +22,6 @@ def run_backtest(df):
         sma_short = float(row["sma_short"])
         sma_long = float(row["sma_long"])
 
-        # BUY using full available cash balance
         if rsi < 30 and sma_short > sma_long and position is None:
             quantity = cash_balance / price
             entry_price = price
@@ -32,13 +34,13 @@ def run_backtest(df):
                 "quantity": round(quantity, 6)
             })
 
-        # SELL current holding
         elif rsi > 70 and sma_short < sma_long and position == "BUY":
             exit_value = quantity * price
             entry_value = quantity * entry_price
             profit = exit_value - entry_value
 
             cash_balance = exit_value
+            realized_profit += profit
             completed_trades += 1
 
             if profit > 0:
@@ -57,16 +59,17 @@ def run_backtest(df):
             entry_price = 0
             quantity = 0
 
-    # If still holding, estimate current portfolio value
     if position == "BUY":
         last_price = float(df.iloc[-1]["close"])
-        holding_value = quantity * last_price
-        final_balance = holding_value
+        current_value = quantity * last_price
+        entry_value = quantity * entry_price
+        unrealized_profit = current_value - entry_value
+        final_balance = current_value
     else:
         final_balance = cash_balance
 
-    total_profit = final_balance - starting_balance
-    profit_percentage = (total_profit / starting_balance) * 100
+    net_profit = final_balance - starting_balance
+    profit_percentage = (net_profit / starting_balance) * 100
 
     if completed_trades > 0:
         win_rate = (winning_trades / completed_trades) * 100
@@ -76,7 +79,9 @@ def run_backtest(df):
     return {
         "starting_balance": starting_balance,
         "final_balance": round(final_balance, 2),
-        "total_profit": round(total_profit, 2),
+        "realized_profit": round(realized_profit, 2),
+        "unrealized_profit": round(unrealized_profit, 2),
+        "net_profit": round(net_profit, 2),
         "profit_percentage": round(profit_percentage, 2),
         "completed_trades": completed_trades,
         "winning_trades": winning_trades,

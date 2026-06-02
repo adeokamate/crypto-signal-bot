@@ -43,13 +43,16 @@ def main(symbol):
     print(f"Pair: {symbol}")
     print(f"Starting Balance: {backtest_results['starting_balance']}")
     print(f"Final Balance: {backtest_results['final_balance']}")
-    print(f"Total Profit: {backtest_results['total_profit']}")
+    print(f"Realized Profit: {backtest_results['realized_profit']}")
+    print(f"Unrealized Profit: {backtest_results['unrealized_profit']}")
+    print(f"Net Profit: {backtest_results['net_profit']}")
     print(f"Profit Percentage: {backtest_results['profit_percentage']}%")
     print(f"Completed Trades: {backtest_results['completed_trades']}")
     print(f"Winning Trades: {backtest_results['winning_trades']}")
     print(f"Losing Trades: {backtest_results['losing_trades']}")
     print(f"Win Rate: {backtest_results['win_rate']}%")
     print(f"Open Position: {backtest_results['open_position']}")
+    print(f"Open Quantity: {backtest_results['open_quantity']}")
     print("============================")
 
     for trade in backtest_results["trades"]:
