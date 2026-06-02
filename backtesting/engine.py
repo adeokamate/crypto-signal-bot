@@ -1,3 +1,9 @@
+from config.settings import (
+    STOP_LOSS_PERCENT,
+    TAKE_PROFIT_PERCENT
+)
+
+
 def run_backtest(df):
     starting_balance = 1000
     cash_balance = starting_balance
@@ -21,6 +27,52 @@ def run_backtest(df):
         rsi = float(row["rsi"])
         sma_short = float(row["sma_short"])
         sma_long = float(row["sma_long"])
+
+        if position == "BUY":
+            stop_loss_price = entry_price * (1 - STOP_LOSS_PERCENT / 100)
+            take_profit_price = entry_price * (1 + TAKE_PROFIT_PERCENT / 100)
+
+            if price <= stop_loss_price:
+                exit_value = quantity * price
+                entry_value = quantity * entry_price
+                profit = exit_value - entry_value
+
+                cash_balance = exit_value
+                realized_profit += profit
+                completed_trades += 1
+                losing_trades += 1
+
+                trades.append({
+                    "type": "STOP LOSS",
+                    "price": round(price, 2),
+                    "quantity": round(quantity, 6),
+                    "profit": round(profit, 2)
+                })
+
+                position = None
+                entry_price = 0
+                quantity = 0
+
+            elif price >= take_profit_price:
+                exit_value = quantity * price
+                entry_value = quantity * entry_price
+                profit = exit_value - entry_value
+
+                cash_balance = exit_value
+                realized_profit += profit
+                completed_trades += 1
+                winning_trades += 1
+
+                trades.append({
+                    "type": "TAKE PROFIT",
+                    "price": round(price, 2),
+                    "quantity": round(quantity, 6),
+                    "profit": round(profit, 2)
+                })
+
+                position = None
+                entry_price = 0
+                quantity = 0
 
         if rsi < 30 and sma_short > sma_long and position is None:
             quantity = cash_balance / price

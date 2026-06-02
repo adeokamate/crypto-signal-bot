@@ -27,6 +27,12 @@ from utils.storage import save_signal_to_csv, log_signal
 from services.market_data import fetch_candle_data
 from backtesting.engine import run_backtest
 
+from config.settings import (
+    STOP_LOSS_PERCENT,
+    TAKE_PROFIT_PERCENT
+)
+
+
 def main(symbol):
     df = fetch_candle_data(
         symbol=symbol,
