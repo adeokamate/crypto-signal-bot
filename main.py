@@ -38,39 +38,28 @@ def main(symbol):
     df = calculate_sma(df)
 
     backtest_results = run_backtest(df)
-    
+
     print("===== BACKTEST RESULTS =====")
-
-    print(
-        f"Starting Balance: "
-        f"{backtest_results['starting_balance']}"
-    )
-
-    print(
-        f"Final Balance: "
-        f"{backtest_results['final_balance']}"
-    )
-
-    print(
-        f"Total Profit: "
-        f"{backtest_results['total_profit']}"
-    )
-
-    print(
-        f"Trades Executed: "
-        f"{backtest_results['total_trades']}"
-    )
-
+    print(f"Pair: {symbol}")
+    print(f"Starting Balance: {backtest_results['starting_balance']}")
+    print(f"Final Balance: {backtest_results['final_balance']}")
+    print(f"Total Profit: {backtest_results['total_profit']}")
+    print(f"Profit Percentage: {backtest_results['profit_percentage']}%")
+    print(f"Completed Trades: {backtest_results['completed_trades']}")
+    print(f"Winning Trades: {backtest_results['winning_trades']}")
+    print(f"Losing Trades: {backtest_results['losing_trades']}")
+    print(f"Win Rate: {backtest_results['win_rate']}%")
+    print(f"Open Position: {backtest_results['open_position']}")
     print("============================")
+
     for trade in backtest_results["trades"]:
         print(trade)
 
     plot_chart(df, symbol)
 
-
     price, rsi, sma_short, sma_long, signal, reason = generate_signal(df)
 
-    print("===== CRYPTO SIGNAL BOT =====")
+    print("\n===== CRYPTO SIGNAL BOT =====")
     print(f"Pair: {symbol}")
     print(f"Latest Price: {price}")
     print(f"RSI: {round(rsi, 2)}")
@@ -81,13 +70,13 @@ def main(symbol):
     print("=============================\n")
 
     log_signal(
-    symbol,
-    price,
-    rsi,
-    sma_short,
-    sma_long,
-    signal
-)
+        symbol,
+        price,
+        rsi,
+        sma_short,
+        sma_long,
+        signal
+    )
 
     save_signal_to_csv(
         symbol,
@@ -98,7 +87,6 @@ def main(symbol):
         signal,
         reason
     )
-
 
 if __name__ == "__main__":
     while True:
