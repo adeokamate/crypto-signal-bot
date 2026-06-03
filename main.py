@@ -4,7 +4,7 @@ from utils.charting import plot_chart
 from strategy.indicators import calculate_rsi, calculate_sma, calculate_macd
 from ta.momentum import RSIIndicator
 from ta.trend import SMAIndicator, macd_signal
-
+from paper_trading.engine import PaperTradingEngine
 from config.settings import (
     SYMBOLS,
     TIMEFRAME,
@@ -31,7 +31,7 @@ from config.settings import (
     STOP_LOSS_PERCENT,
     TAKE_PROFIT_PERCENT
 )
-
+paper_engine = PaperTradingEngine(starting_balance=1000)
 
 def main(symbol):
     df = fetch_candle_data(
@@ -102,6 +102,18 @@ def main(symbol):
         signal,
         reason
     )
+    paper_engine.update(symbol, price, signal)
+
+    paper_status = paper_engine.get_status(current_price=price)
+
+    print("===== PAPER TRADING STATUS =====")
+    print(f"Cash Balance: {paper_status['cash_balance']}")
+    print(f"Position: {paper_status['position']}")
+    print(f"Entry Price: {paper_status['entry_price']}")
+    print(f"Quantity: {paper_status['quantity']}")
+    print(f"Unrealized Profit: {paper_status['unrealized_profit']}")
+    print(f"Total Value: {paper_status['total_value']}")
+    print("================================\n")
 
 if __name__ == "__main__":
     while True:
