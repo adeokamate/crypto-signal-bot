@@ -1,9 +1,9 @@
 import pandas as pd
 import time
 from utils.charting import plot_chart
-
+from strategy.indicators import calculate_rsi, calculate_sma, calculate_macd
 from ta.momentum import RSIIndicator
-from ta.trend import SMAIndicator
+from ta.trend import SMAIndicator, macd_signal
 
 from config.settings import (
     SYMBOLS,
@@ -42,7 +42,7 @@ def main(symbol):
 
     df = calculate_rsi(df)
     df = calculate_sma(df)
-
+    df = calculate_macd(df)
     backtest_results = run_backtest(df)
 
     print("===== BACKTEST RESULTS =====")
@@ -66,7 +66,7 @@ def main(symbol):
 
     plot_chart(df, symbol)
 
-    price, rsi, sma_short, sma_long, signal, reason = generate_signal(df)
+    price, rsi, sma_short, sma_long,macd, macd_signal, signal, reason = generate_signal(df)
 
     print("\n===== CRYPTO SIGNAL BOT =====")
     print(f"Pair: {symbol}")
@@ -74,6 +74,8 @@ def main(symbol):
     print(f"RSI: {round(rsi, 2)}")
     print(f"SMA{SMA_SHORT_WINDOW}: {round(sma_short, 2)}")
     print(f"SMA{SMA_LONG_WINDOW}: {round(sma_long, 2)}")
+    print(f"MACD: {round(macd, 4)}")
+    print(f"MACD Signal: {round(macd_signal, 4)}")
     print(f"Signal: {signal}")
     print(f"Reason: {reason}")
     print("=============================\n")
@@ -84,6 +86,8 @@ def main(symbol):
         rsi,
         sma_short,
         sma_long,
+        macd,
+        macd_signal,
         signal
     )
 
@@ -93,6 +97,8 @@ def main(symbol):
         rsi,
         sma_short,
         sma_long,
+        macd,
+        macd_signal,
         signal,
         reason
     )

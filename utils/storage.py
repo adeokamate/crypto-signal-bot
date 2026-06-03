@@ -11,7 +11,17 @@ logging.basicConfig(
 )
 
 
-def save_signal_to_csv(symbol, price, rsi, sma_short, sma_long, signal, reason):
+def save_signal_to_csv(
+    symbol,
+    price,
+    rsi,
+    sma_short,
+    sma_long,
+    macd,
+    macd_signal,
+    signal,
+    reason
+):
     os.makedirs("logs", exist_ok=True)
 
     file_path = "logs/signals.csv"
@@ -28,6 +38,8 @@ def save_signal_to_csv(symbol, price, rsi, sma_short, sma_long, signal, reason):
                 "rsi",
                 "sma_short",
                 "sma_long",
+                "macd",
+                "macd_signal",
                 "signal",
                 "reason"
             ])
@@ -35,21 +47,36 @@ def save_signal_to_csv(symbol, price, rsi, sma_short, sma_long, signal, reason):
         writer.writerow([
             pd.Timestamp.now(),
             symbol,
-            price,
+            round(price, 2),
             round(rsi, 2),
             round(sma_short, 2),
             round(sma_long, 2),
+            round(macd, 4),
+            round(macd_signal, 4),
             signal,
             reason
         ])
 
 
-def log_signal(symbol, price, rsi, sma_short, sma_long, signal):
+def log_signal(
+    symbol,
+    price,
+    rsi,
+    sma_short,
+    sma_long,
+    macd,
+    macd_signal,
+    signal
+):
     os.makedirs("logs", exist_ok=True)
 
     logging.info(
-        f"{symbol} | Price: {price} | RSI: {round(rsi, 2)} | "
-        f"SMA Short: {round(sma_short, 2)} | "
-        f"SMA Long: {round(sma_long, 2)} | "
+        f"{symbol} | "
+        f"Price: {round(price,2)} | "
+        f"RSI: {round(rsi,2)} | "
+        f"SMA Short: {round(sma_short,2)} | "
+        f"SMA Long: {round(sma_long,2)} | "
+        f"MACD: {round(macd,4)} | "
+        f"MACD Signal: {round(macd_signal,4)} | "
         f"Signal: {signal}"
     )

@@ -16,7 +16,10 @@ def generate_signal(df):
 
     sma_long = latest["sma_long"]
 
-    if rsi < RSI_BUY_THRESHOLD and sma_short > sma_long:
+    macd = latest["macd"]
+    macd_signal = latest["macd_signal"]
+
+    if rsi < RSI_BUY_THRESHOLD and sma_short > sma_long and macd > macd_signal:
 
         signal = "STRONG BUY"
 
@@ -24,7 +27,7 @@ def generate_signal(df):
             "RSI is oversold and short SMA is above long SMA"
         )
 
-    elif rsi > RSI_SELL_THRESHOLD and sma_short < sma_long:
+    elif rsi > RSI_SELL_THRESHOLD and sma_short < sma_long and macd < macd_signal:
 
         signal = "STRONG SELL"
 
@@ -59,6 +62,8 @@ def generate_signal(df):
         rsi,
         sma_short,
         sma_long,
+        macd,
+        macd_signal,
         signal,
         reason
     )

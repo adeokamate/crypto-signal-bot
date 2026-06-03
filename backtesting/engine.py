@@ -27,6 +27,8 @@ def run_backtest(df):
         rsi = float(row["rsi"])
         sma_short = float(row["sma_short"])
         sma_long = float(row["sma_long"])
+        macd = float(row["macd"])
+        macd_signal = float(row["macd_signal"])
 
         if position == "BUY":
             stop_loss_price = entry_price * (1 - STOP_LOSS_PERCENT / 100)
@@ -74,7 +76,7 @@ def run_backtest(df):
                 entry_price = 0
                 quantity = 0
 
-        if rsi < 30 and sma_short > sma_long and position is None:
+        if rsi < 30 and sma_short > sma_long and macd > macd_signal and position is None:
             quantity = cash_balance / price
             entry_price = price
             cash_balance = 0
@@ -86,7 +88,7 @@ def run_backtest(df):
                 "quantity": round(quantity, 6)
             })
 
-        elif rsi > 70 and sma_short < sma_long and position == "BUY":
+        elif rsi > 70 and sma_short < sma_long and macd < macd_signal and position == "BUY":
             exit_value = quantity * price
             entry_value = quantity * entry_price
             profit = exit_value - entry_value
