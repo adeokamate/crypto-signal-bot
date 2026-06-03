@@ -87,3 +87,58 @@ class Portfolio:
             "total_value": round(total_value, 2),
             "trades": self.trades
         }
+    
+
+    def get_analytics(self, current_price):
+            status = self.get_status(current_price)
+
+            completed_trades = [
+                trade for trade in self.trades
+                if trade["type"] == "SELL"
+            ]
+
+            profits = [
+                trade.get("profit", 0)
+                for trade in completed_trades
+            ]
+
+            winning_trades = [
+                profit for profit in profits
+                if profit > 0
+            ]
+
+            losing_trades = [
+                profit for profit in profits
+                if profit <= 0
+            ]
+
+            total_trades = len(completed_trades)
+            total_profit = sum(profits)
+            net_profit = status["total_value"] - self.starting_balance
+
+            if total_trades > 0:
+                win_rate = (len(winning_trades) / total_trades) * 100
+                average_profit = total_profit / total_trades
+            else:
+                win_rate = 0
+                average_profit = 0
+
+            best_trade = max(profits) if profits else 0
+            worst_trade = min(profits) if profits else 0
+
+            return {
+                "symbol": self.symbol,
+                "total_trades": total_trades,
+                "winning_trades": len(winning_trades),
+                "losing_trades": len(losing_trades),
+                "win_rate": round(win_rate, 2),
+                "total_profit": round(total_profit, 2),
+                "best_trade": round(best_trade, 2),
+                "worst_trade": round(worst_trade, 2),
+                "average_profit": round(average_profit, 2),
+                "net_profit": round(net_profit, 2),
+                "return_percentage": round(
+                    (net_profit / self.starting_balance) * 100,
+                    2
+                )
+            }

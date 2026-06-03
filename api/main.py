@@ -5,7 +5,7 @@ from services.market_data import fetch_candle_data
 from strategy.indicators import calculate_rsi, calculate_sma, calculate_macd
 from strategy.signals import generate_signal
 from backtesting.engine import run_backtest
-
+from paper_trading.engine import PaperTradingEngine
 
 app = FastAPI(
     title="Crypto Signal Bot API",
@@ -13,6 +13,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
+paper_engine = PaperTradingEngine(
+    symbols=SYMBOLS,
+    starting_balance=1000
+)
 
 def analyze_symbol(symbol):
     df = fetch_candle_data(
@@ -89,4 +93,49 @@ def backtest(symbol: str):
     return {
         "symbol": symbol,
         "backtest": results
+    }
+@app.get("/portfolio/{symbol}")
+def get_portfolio(symbol: str):
+    symbol = symbol.upper().replace("-", "/")
+
+    analysis = analyze_symbol(symbol)
+
+    paper_engine.update(
+        symbol=symbol,
+        price=analysis["price"],
+        signal=analysis["signal"]
+    )
+
+    status = paper_engine.get_status(
+        symbol=symbol,
+        current_price=analysis["price"]
+    )
+
+    return {
+        "symbol": symbol,
+        "signal": analysis,
+        "portfolio": status
+    }
+
+@app.get("/analytics/{symbol}")
+def get_analytics(symbol: str):
+    symbol = symbol.upper().replace("-", "/")
+
+    analysis = analyze_symbol(symbol)
+
+    paper_engine.update(
+        symbol=symbol,
+        price=analysis["price"],
+        signal=analysis["signal"]
+    )
+
+    analytics = paper_engine.get_analytics(
+        symbol=symbol,
+        current_price=analysis["price"]
+    )
+
+    return {
+        "symbol": symbol,
+        "signal": analysis,
+        "analytics": analytics
     }

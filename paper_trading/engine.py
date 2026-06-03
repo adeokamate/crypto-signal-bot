@@ -37,3 +37,12 @@ class PaperTradingEngine:
                 statuses[symbol] = portfolio.get_status(price)
 
         return statuses
+    
+
+    def get_analytics(self, symbol, current_price):
+        portfolio = self.portfolios.get(symbol)
+
+        if portfolio is None:
+            return None
+
+        return portfolio.get_analytics(current_price)
