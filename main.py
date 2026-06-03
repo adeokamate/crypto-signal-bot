@@ -31,7 +31,10 @@ from config.settings import (
     STOP_LOSS_PERCENT,
     TAKE_PROFIT_PERCENT
 )
-paper_engine = PaperTradingEngine(starting_balance=1000)
+paper_engine = PaperTradingEngine(
+    symbols=SYMBOLS,
+    starting_balance=1000
+)
 
 def main(symbol):
     df = fetch_candle_data(
@@ -104,7 +107,10 @@ def main(symbol):
     )
     paper_engine.update(symbol, price, signal)
 
-    paper_status = paper_engine.get_status(current_price=price)
+    paper_status = paper_engine.get_status(
+    symbol=symbol,
+    current_price=price
+)
 
     print("===== PAPER TRADING STATUS =====")
     print(f"Cash Balance: {paper_status['cash_balance']}")

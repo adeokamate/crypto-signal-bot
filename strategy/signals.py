@@ -6,6 +6,9 @@ from config.settings import (
 
 def generate_signal(df):
 
+    buy_score = 0
+    sell_score = 0
+
     latest = df.iloc[-1]
 
     price = latest["close"]
@@ -19,44 +22,46 @@ def generate_signal(df):
     macd = latest["macd"]
     macd_signal = latest["macd_signal"]
 
-    if rsi < RSI_BUY_THRESHOLD and sma_short > sma_long and macd > macd_signal:
+   # RSI
+    if rsi < RSI_BUY_THRESHOLD:
+        buy_score += 1
 
+    if rsi > RSI_SELL_THRESHOLD:
+        sell_score += 1
+
+    # SMA
+    if sma_short > sma_long:
+        buy_score += 1
+
+    if sma_short < sma_long:
+        sell_score += 1
+
+    # MACD
+    if macd > macd_signal:
+        buy_score += 1
+
+    if macd < macd_signal:
+        sell_score += 1
+
+    if buy_score == 3:
         signal = "STRONG BUY"
+        reason = "All indicators confirm bullish setup"
 
-        reason = (
-            "RSI is oversold and short SMA is above long SMA"
-        )
+    elif buy_score == 2:
+        signal = "BUY"
+        reason = "Majority of indicators are bullish"
 
-    elif rsi > RSI_SELL_THRESHOLD and sma_short < sma_long and macd < macd_signal:
-
+    elif sell_score == 3:
         signal = "STRONG SELL"
+        reason = "All indicators confirm bearish setup"
 
-        reason = (
-            "RSI is overbought and short SMA is below long SMA"
-        )
-
-    elif sma_short > sma_long:
-
-        signal = "HOLD"
-
-        reason = (
-            "Trend is bullish, but RSI has not reached buy zone"
-        )
-
-    elif sma_short < sma_long:
-
-        signal = "HOLD"
-
-        reason = (
-            "Trend is bearish, but RSI has not reached sell zone"
-        )
+    elif sell_score == 2:
+        signal = "SELL"
+        reason = "Majority of indicators are bearish"
 
     else:
-
         signal = "HOLD"
-
-        reason = "No clear signal"
-
+        reason = "No strong market consensus"
     return (
         price,
         rsi,
