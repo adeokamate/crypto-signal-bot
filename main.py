@@ -35,6 +35,7 @@ paper_engine = PaperTradingEngine(
     symbols=SYMBOLS,
     starting_balance=1000
 )
+from paper_trading.analytics import calculate_portfolio_analytics
 
 def main(symbol):
     df = fetch_candle_data(
@@ -112,6 +113,8 @@ def main(symbol):
     current_price=price
 )
 
+    analytics = calculate_portfolio_analytics(paper_status)
+
     print("===== PAPER TRADING STATUS =====")
     print(f"Cash Balance: {paper_status['cash_balance']}")
     print(f"Position: {paper_status['position']}")
@@ -119,6 +122,19 @@ def main(symbol):
     print(f"Quantity: {paper_status['quantity']}")
     print(f"Unrealized Profit: {paper_status['unrealized_profit']}")
     print(f"Total Value: {paper_status['total_value']}")
+    print("================================\n")
+
+    print("===== PORTFOLIO ANALYTICS =====")
+    print(f"Total Trades: {analytics['total_trades']}")
+    print(f"Winning Trades: {analytics['winning_trades']}")
+    print(f"Losing Trades: {analytics['losing_trades']}")
+    print(f"Win Rate: {analytics['win_rate']}%")
+    print(f"Total Profit: {analytics['total_profit']}")
+    print(f"Best Trade: {analytics['best_trade']}")
+    print(f"Worst Trade: {analytics['worst_trade']}")
+    print(f"Average Profit: {analytics['average_profit']}")
+    print(f"Net Profit: {analytics['net_profit']}")
+    print(f"Return Percentage: {analytics['return_percentage']}%")
     print("================================\n")
 
 if __name__ == "__main__":
