@@ -1,47 +1,17 @@
 from fastapi import FastAPI
 
-from config.settings import SYMBOLS, TIMEFRAME, CANDLE_LIMIT
-from services.market_data import fetch_candle_data
-from strategy.indicators import calculate_rsi, calculate_sma, calculate_macd
-from strategy.signals import generate_signal
-from backtesting.engine import run_backtest
-from paper_trading.engine import PaperTradingEngine
+from api.signals import router as signals_router
+from api.backtest import router as backtest_router
+from api.portfolio import router as portfolio_router
+from api.analytics import router as analytics_router
+from api.dashboard import router as dashboard_router
+
 
 app = FastAPI(
     title="Crypto Signal Bot API",
-    description="API backend for crypto signal analysis, backtesting and trading analytics",
+    description="API backend for crypto signal analysis, backtesting, paper trading and analytics",
     version="1.0.0"
 )
-
-paper_engine = PaperTradingEngine(
-    symbols=SYMBOLS,
-    starting_balance=1000
-)
-
-def analyze_symbol(symbol):
-    df = fetch_candle_data(
-        symbol=symbol,
-        timeframe=TIMEFRAME,
-        limit=CANDLE_LIMIT
-    )
-
-    df = calculate_rsi(df)
-    df = calculate_sma(df)
-    df = calculate_macd(df)
-
-    price, rsi, sma_short, sma_long, macd, macd_signal, signal, reason = generate_signal(df)
-
-    return {
-        "symbol": symbol,
-        "price": round(price, 2),
-        "rsi": round(rsi, 2),
-        "sma_short": round(sma_short, 2),
-        "sma_long": round(sma_long, 2),
-        "macd": round(macd, 4),
-        "macd_signal": round(macd_signal, 4),
-        "signal": signal,
-        "reason": reason
-    }
 
 
 @app.get("/")
@@ -51,91 +21,8 @@ def home():
     }
 
 
-@app.get("/symbols")
-def get_symbols():
-    return {
-        "symbols": SYMBOLS
-    }
-
-
-@app.get("/signal/{symbol}")
-def get_signal(symbol: str):
-    symbol = symbol.upper().replace("-", "/")
-    return analyze_symbol(symbol)
-
-
-@app.get("/signals")
-def get_all_signals():
-    return {
-        "signals": [
-            analyze_symbol(symbol)
-            for symbol in SYMBOLS
-        ]
-    }
-
-
-@app.get("/backtest/{symbol}")
-def backtest(symbol: str):
-    symbol = symbol.upper().replace("-", "/")
-
-    df = fetch_candle_data(
-        symbol=symbol,
-        timeframe=TIMEFRAME,
-        limit=CANDLE_LIMIT
-    )
-
-    df = calculate_rsi(df)
-    df = calculate_sma(df)
-    df = calculate_macd(df)
-
-    results = run_backtest(df)
-
-    return {
-        "symbol": symbol,
-        "backtest": results
-    }
-@app.get("/portfolio/{symbol}")
-def get_portfolio(symbol: str):
-    symbol = symbol.upper().replace("-", "/")
-
-    analysis = analyze_symbol(symbol)
-
-    paper_engine.update(
-        symbol=symbol,
-        price=analysis["price"],
-        signal=analysis["signal"]
-    )
-
-    status = paper_engine.get_status(
-        symbol=symbol,
-        current_price=analysis["price"]
-    )
-
-    return {
-        "symbol": symbol,
-        "signal": analysis,
-        "portfolio": status
-    }
-
-@app.get("/analytics/{symbol}")
-def get_analytics(symbol: str):
-    symbol = symbol.upper().replace("-", "/")
-
-    analysis = analyze_symbol(symbol)
-
-    paper_engine.update(
-        symbol=symbol,
-        price=analysis["price"],
-        signal=analysis["signal"]
-    )
-
-    analytics = paper_engine.get_analytics(
-        symbol=symbol,
-        current_price=analysis["price"]
-    )
-
-    return {
-        "symbol": symbol,
-        "signal": analysis,
-        "analytics": analytics
-    }
+app.include_router(signals_router)
+app.include_router(backtest_router)
+app.include_router(portfolio_router)
+app.include_router(analytics_router)
+app.include_router(dashboard_router)
