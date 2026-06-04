@@ -44,11 +44,20 @@ def get_dashboard(symbol: str):
         symbol=symbol,
         current_price=signal_data["price"]
     )
+    chart_data = []
 
+    for _, row in df.tail(50).iterrows():
+        chart_data.append({
+            "time": str(row["timestamp"]),
+            "close": round(float(row["close"]), 2),
+            "sma_short": round(float(row["sma_short"]), 2),
+            "sma_long": round(float(row["sma_long"]), 2)
+        })
     return {
         "symbol": symbol,
         "signal": signal_data,
         "backtest": backtest_results,
         "portfolio": portfolio_status,
-        "analytics": portfolio_analytics
+        "analytics": portfolio_analytics,
+        "chart_data": chart_data
     }

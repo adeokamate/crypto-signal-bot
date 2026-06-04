@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { getDashboard } from "../services/api";
 import MetricCard from "../components/MetricCard";
 import SignalCard from "../components/SignalCard";
+import AnalyticsCard from "../components/AnalyticsCard";
 import SymbolSelector from "../components/SymbolSelector";
+import PriceChart from "../components/PriceChart";
+
 function Dashboard() {
   const [data, setData] = useState(null);
     const [symbol, setSymbol] = useState("BTC-USDT");
@@ -27,7 +30,7 @@ function Dashboard() {
   return (
     <div>
       <h1>Crypto Signal Bot Dashboard</h1>
-      
+      <SymbolSelector selectedSymbol={symbol} onChange={setSymbol} />
       <h2>{data.symbol}</h2>
 
       <div className="dashboard-grid">
@@ -42,6 +45,8 @@ function Dashboard() {
           signal={data.signal.signal}
           reason={data.signal.reason}
         />
+        <AnalyticsCard analytics={data.analytics} />
+        <PriceChart data={data.chart_data} />
       </div>
     </div>
   );

@@ -37,3 +37,22 @@ body {
 .signal-card h2 {
   font-size: 32px;
 }
+.analytics-card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.analytics-card h3 {
+  margin-top: 0;
+  color: #94a3b8;
+
+  grid-column: span 2;
+}
+
+.chart-card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 25px;
+}
